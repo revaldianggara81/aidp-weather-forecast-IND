@@ -65,8 +65,14 @@ Table created with `sql/create_table.sql`: PK `("DATE", CITY)` plus index
     (4063 mm/yr), Sikkim, Arunachal Pradesh (all NE India); driest =
     Ladakh (326 mm/yr), Rajasthan (677 mm/yr).
   - `INDONESIA_WEATHER` unchanged at 10,962 rows.
-- **M5 — git init and push** to
-  https://github.com/revaldianggara81/aidp-weather-forecast-IND.git — TODO
+- **M5 — git init and push** — DONE
+  - Repo: https://github.com/revaldianggara81/aidp-weather-forecast-IND
+  - 73 files on `main`. Notebook outputs cleared before the first commit so
+    the public repo carries no stale Indonesian execution results.
+  - `.env`, wallet files, `node_modules/`, `.next/`, `__pycache__/` and
+    Claude artefacts are all gitignored and verified absent from the remote.
+  - Concrete DSN / wallet path / schema names are kept out of this file;
+    they live in `.env` only.
 
 ## Carried-over items
 
