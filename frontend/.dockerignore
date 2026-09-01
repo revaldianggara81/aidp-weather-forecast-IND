@@ -1,0 +1,12 @@
+node_modules
+.next
+
+# secrets — never send to the build context
+.env.local
+.env*.local
+
+npm-debug.log*
+.git
+README.md
+tsconfig.tsbuildinfo
+.DS_Store

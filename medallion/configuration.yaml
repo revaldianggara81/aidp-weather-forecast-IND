@@ -1,0 +1,227 @@
+# 28 states + 8 union territories of India (36 regions).
+# `name` is stored in the Oracle CITY column; lat/lon is the point used to
+# query Open-Meteo. Coordinates verified against the Open-Meteo geocoding API.
+regions:
+  - name: Andhra Pradesh
+    capital: Amaravati
+    lat: 16.514
+    lon: 80.516
+  - name: Arunachal Pradesh
+    capital: Itanagar
+    lat: 27.08694
+    lon: 93.60987
+  - name: Assam
+    capital: Dispur
+    lat: 26.13564
+    lon: 91.80069
+  - name: Bihar
+    capital: Patna
+    lat: 25.59408
+    lon: 85.13563
+  - name: Chhattisgarh
+    capital: Raipur
+    lat: 21.23333
+    lon: 81.63333
+  - name: Goa
+    capital: Panaji
+    lat: 15.4957
+    lon: 73.8262
+  - name: Gujarat
+    capital: Gandhinagar
+    lat: 23.21667
+    lon: 72.68333
+  - name: Haryana
+    capital: Gurugram   # largest city, not the capital (capital Chandigarh is shared)
+    lat: 28.4601
+    lon: 77.0263
+  - name: Himachal Pradesh
+    capital: Shimla
+    lat: 31.10442
+    lon: 77.16662
+  - name: Jharkhand
+    capital: Ranchi
+    lat: 23.34316
+    lon: 85.3094
+  - name: Karnataka
+    capital: Bengaluru
+    lat: 12.97194
+    lon: 77.59369
+  - name: Kerala
+    capital: Thiruvananthapuram
+    lat: 8.4855
+    lon: 76.94924
+  - name: Madhya Pradesh
+    capital: Bhopal
+    lat: 23.25469
+    lon: 77.40289
+  - name: Maharashtra
+    capital: Mumbai
+    lat: 19.07283
+    lon: 72.88261
+  - name: Manipur
+    capital: Imphal
+    lat: 24.80805
+    lon: 93.9442
+  - name: Meghalaya
+    capital: Shillong
+    lat: 25.56892
+    lon: 91.88313
+  - name: Mizoram
+    capital: Aizawl
+    lat: 23.72894
+    lon: 92.71791
+  - name: Nagaland
+    capital: Kohima
+    lat: 25.67467
+    lon: 94.11099
+  - name: Odisha
+    capital: Bhubaneswar
+    lat: 20.27241
+    lon: 85.83385
+  - name: Punjab
+    capital: Ludhiana   # largest city, not the capital (capital Chandigarh is shared)
+    lat: 30.912
+    lon: 75.8538
+  - name: Rajasthan
+    capital: Jaipur
+    lat: 26.91962
+    lon: 75.78781
+  - name: Sikkim
+    capital: Gangtok
+    lat: 27.32574
+    lon: 88.61216
+  - name: Tamil Nadu
+    capital: Chennai
+    lat: 13.08784
+    lon: 80.27847
+  - name: Telangana
+    capital: Hyderabad
+    lat: 17.38405
+    lon: 78.45636
+  - name: Tripura
+    capital: Agartala
+    lat: 23.83605
+    lon: 91.27939
+  - name: Uttar Pradesh
+    capital: Lucknow
+    lat: 26.83928
+    lon: 80.92313
+  - name: Uttarakhand
+    capital: Dehradun
+    lat: 30.32443
+    lon: 78.03392
+  - name: West Bengal
+    capital: Kolkata
+    lat: 22.56263
+    lon: 88.36304
+
+  # ── Union territories ──
+  - name: Andaman and Nicobar Islands
+    capital: Port Blair
+    lat: 11.66613
+    lon: 92.74635
+  - name: Chandigarh
+    capital: Chandigarh
+    lat: 30.73629
+    lon: 76.7884
+  - name: Dadra and Nagar Haveli and Daman and Diu
+    capital: Daman
+    lat: 20.41431
+    lon: 72.83236
+  - name: Delhi
+    capital: New Delhi
+    lat: 28.62137
+    lon: 77.2148
+  - name: Jammu and Kashmir
+    capital: Srinagar
+    lat: 34.08565
+    lon: 74.80555
+  - name: Ladakh
+    capital: Leh
+    lat: 34.16504
+    lon: 77.58402
+  - name: Lakshadweep
+    capital: Kavaratti
+    lat: 10.56688
+    lon: 72.64203
+  - name: Puducherry
+    capital: Puducherry
+    lat: 11.93381
+    lon: 79.82979
+
+forecasting:
+  test_days: 30        # days held out for model evaluation
+  forecast_days: 30    # days to forecast into the future
+  context_days: 60     # days of history shown in plots
+
+features:
+  lags: [1, 7, 14, 30]        # lag sizes (in days) for each target variable
+  rolling_windows: [7, 14, 30] # window sizes (in days) for rolling mean/std
+
+lgbm:
+  n_estimators: 500
+  learning_rate: 0.05
+  num_leaves: 31
+  feature_fraction: 0.8
+  bagging_fraction: 0.8
+  bagging_freq: 5
+  min_child_samples: 10
+  random_state: 42
+
+prophet:
+  seasonality_mode: additive   # additive or multiplicative
+  yearly_seasonality: true
+  weekly_seasonality: true
+  daily_seasonality: false
+  changepoint_prior_scale: 0.05
+
+nhits:
+  input_size: 60      # lookback window in days (2x forecast horizon)
+  max_steps: 500
+  learning_rate: 0.001
+  batch_size: 32
+  random_seed: 42
+
+lstm:
+  input_size: 60      # lookback window in days
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.2
+  learning_rate: 0.001
+  epochs: 100
+  batch_size: 32
+
+lstm_attn:
+  input_size: 60          # lookback window in days
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.2
+  learning_rate: 0.001
+  epochs: 200             # more epochs (early stopping will cut short)
+  batch_size: 32
+  n_heads: 4              # multi-head attention heads
+  attention_dropout: 0.1
+  early_stop_patience: 15 # epochs without val improvement before stopping
+  gradient_clip: 1.0      # max gradient norm
+
+ensemble:
+  ridge_alpha: 1.0    # L2 regularisation strength for the Ridge meta-model
+
+tft:
+  input_size: 60      # lookback window in days
+  hidden_size: 64     # model dimension (smaller = faster training)
+  n_head: 4           # number of attention heads
+  dropout: 0.1
+  max_steps: 500
+  learning_rate: 0.001
+  batch_size: 32
+  random_seed: 42
+
+ar_lstm:
+  input_size: 60      # lookback window in days
+  hidden_size: 128
+  num_layers: 2
+  dropout: 0.2
+  learning_rate: 0.001
+  epochs: 100
+  batch_size: 32
