@@ -1,0 +1,146 @@
+{
+ "Andaman and Nicobar Islands": {
+  "lat": 11.66613,
+  "lng": 92.74635
+ },
+ "Andhra Pradesh": {
+  "lat": 16.514,
+  "lng": 80.516
+ },
+ "Arunachal Pradesh": {
+  "lat": 27.08694,
+  "lng": 93.60987
+ },
+ "Assam": {
+  "lat": 26.13564,
+  "lng": 91.80069
+ },
+ "Bihar": {
+  "lat": 25.59408,
+  "lng": 85.13563
+ },
+ "Chandigarh": {
+  "lat": 30.73629,
+  "lng": 76.7884
+ },
+ "Chhattisgarh": {
+  "lat": 21.23333,
+  "lng": 81.63333
+ },
+ "Dadra and Nagar Haveli and Daman and Diu": {
+  "lat": 20.41431,
+  "lng": 72.83236
+ },
+ "Delhi": {
+  "lat": 28.62137,
+  "lng": 77.2148
+ },
+ "Goa": {
+  "lat": 15.4957,
+  "lng": 73.8262
+ },
+ "Gujarat": {
+  "lat": 23.21667,
+  "lng": 72.68333
+ },
+ "Haryana": {
+  "lat": 28.4601,
+  "lng": 77.0263
+ },
+ "Himachal Pradesh": {
+  "lat": 31.10442,
+  "lng": 77.16662
+ },
+ "Jammu and Kashmir": {
+  "lat": 34.08565,
+  "lng": 74.80555
+ },
+ "Jharkhand": {
+  "lat": 23.34316,
+  "lng": 85.3094
+ },
+ "Karnataka": {
+  "lat": 12.97194,
+  "lng": 77.59369
+ },
+ "Kerala": {
+  "lat": 8.4855,
+  "lng": 76.94924
+ },
+ "Ladakh": {
+  "lat": 34.16504,
+  "lng": 77.58402
+ },
+ "Lakshadweep": {
+  "lat": 10.56688,
+  "lng": 72.64203
+ },
+ "Madhya Pradesh": {
+  "lat": 23.25469,
+  "lng": 77.40289
+ },
+ "Maharashtra": {
+  "lat": 19.07283,
+  "lng": 72.88261
+ },
+ "Manipur": {
+  "lat": 24.80805,
+  "lng": 93.9442
+ },
+ "Meghalaya": {
+  "lat": 25.56892,
+  "lng": 91.88313
+ },
+ "Mizoram": {
+  "lat": 23.72894,
+  "lng": 92.71791
+ },
+ "Nagaland": {
+  "lat": 25.67467,
+  "lng": 94.11099
+ },
+ "Odisha": {
+  "lat": 20.27241,
+  "lng": 85.83385
+ },
+ "Puducherry": {
+  "lat": 11.93381,
+  "lng": 79.82979
+ },
+ "Punjab": {
+  "lat": 30.912,
+  "lng": 75.8538
+ },
+ "Rajasthan": {
+  "lat": 26.91962,
+  "lng": 75.78781
+ },
+ "Sikkim": {
+  "lat": 27.32574,
+  "lng": 88.61216
+ },
+ "Tamil Nadu": {
+  "lat": 13.08784,
+  "lng": 80.27847
+ },
+ "Telangana": {
+  "lat": 17.38405,
+  "lng": 78.45636
+ },
+ "Tripura": {
+  "lat": 23.83605,
+  "lng": 91.27939
+ },
+ "Uttar Pradesh": {
+  "lat": 26.83928,
+  "lng": 80.92313
+ },
+ "Uttarakhand": {
+  "lat": 30.32443,
+  "lng": 78.03392
+ },
+ "West Bengal": {
+  "lat": 22.56263,
+  "lng": 88.36304
+ }
+}

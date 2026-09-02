@@ -24,6 +24,7 @@ best_lstm_config.yaml
 frontend/node_modules/
 frontend/.next/
 frontend/.env.local
+!frontend/.env.local.example
 
 # Claude
 CLAUDE.md

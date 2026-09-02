@@ -91,3 +91,46 @@ first data load.
 Open-Meteo's free tier rate-limits per minute and per hour. With 36 regions
 the archive fetch must batch multiple coordinates per request; one request
 per region trips HTTP 429.
+
+## Post-M5 work
+
+Deployment and defect fixes after the initial push.
+
+### Docker
+
+Stack namespaced apart from the Indonesian one so both run on the same host:
+`aidp-india-weather-forecast` / `aidp-india-weather-nginx` on port **9334**
+(Indonesia uses 9333), image `aidp-india-web`. `env_file` is `required: false`
+so the stack starts before the Delta Share exists. See README for details.
+
+### Defects found and fixed
+
+1. **NaN crash in gold training.** `df.pivot` on a DATE x CITY grid leaves NaN
+   wherever a region is missing a date; `_global_zscore` used `nanmean`/`nanstd`,
+   which tolerate NaN but propagate it. Validation loss went NaN, so
+   `vl < best_val` was never true, `best_state` stayed `None`, and
+   `load_state_dict(None)` raised a TypeError 20 epochs after the real problem.
+   Silver now drops dates not present for every region and asserts the grid is
+   complete; gold raises early with a message naming the cause.
+
+2. **Global statistics on a climatically diverse country.** Normalisation and
+   anomaly thresholds were computed across all 36 regions pooled. Ladakh (4 C
+   annual mean against a 12-29 C national range) was forecast 8.5 C too warm,
+   and 95th-percentile anomalies concentrated on Lakshadweep (23/30 days) and
+   the Andamans (21/30) while 21 regions never flagged anything. Both are now
+   per-region. Latent in the Indonesian original, where 6 uniformly tropical
+   cities made pooling harmless.
+
+3. **Map markers geocoded to the wrong continent.** `/api/coords` geocoded
+   region names with `count=1` and no country filter: Assam landed in
+   Mozambique, Goa in Genova, Odisha in Germany, Kerala in Finland, and only
+   16 of 36 regions resolved at all. Coordinates now come from
+   `frontend/public/india_region_coords.json`, generated from
+   `configuration.yaml` -- the same verified source that produced the weather
+   data, so markers and forecasts cannot diverge. The route makes no network
+   calls.
+
+### Known remaining risk
+
+Fixes 1 and 2 are in the notebooks but the AIDP gold table still holds output
+from the pre-fix run. Re-run gold in AIDP to pick them up.

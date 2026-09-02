@@ -186,10 +186,9 @@ def _pivot(df, cities):
     return data, dates
 
 
-def _global_zscore(data):
-    flat = data.reshape(-1, 3)
-    mean = np.nanmean(flat, axis=0)
-    std  = np.nanstd(flat, axis=0)
+def _per_region_zscore(data):
+    mean = np.nanmean(data, axis=0)
+    std  = np.nanstd(data, axis=0)
     return (data - mean) / (std + 1e-8), mean, std
 
 
@@ -300,7 +299,7 @@ def run_ar_lstm(train_df, test_actuals_3d, cities):
     in_dim = 3 + n_cities
 
     train_data, _ = _pivot(train_df, cities)
-    train_norm, mean_tr, std_tr = _global_zscore(train_data)
+    train_norm, mean_tr, std_tr = _per_region_zscore(train_data)
 
     samples = _mv_samples(train_norm, city_onehot)
     model = _train_lstm(samples, in_dim=in_dim, out_dim=3, label="AR-LSTM")
@@ -310,7 +309,7 @@ def run_ar_lstm(train_df, test_actuals_3d, cities):
     for ci, city in enumerate(cities):
         seed = train_norm[-INPUT_DAYS:, ci, :]
         preds_norm = _rollout_mv(model, seed, city_onehot[ci], TEST_DAYS)
-        preds_raw = preds_norm * (std_tr + 1e-8) + mean_tr
+        preds_raw = preds_norm * (std_tr[ci] + 1e-8) + mean_tr[ci]
         preds_raw[:, 1] = np.maximum(0.0, preds_raw[:, 1])  # clip precip
         for step in range(TEST_DAYS):
             rows.append({"step": step, "CITY": city,

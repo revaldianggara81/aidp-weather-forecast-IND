@@ -112,11 +112,10 @@ def _pivot(df):
     return data, cities, dates
 
 
-def _global_zscore(data):
-    """Per-target Z-score across all cities × time.  data: (T, n_cities, 3)."""
-    flat = data.reshape(-1, 3)
-    mean = np.nanmean(flat, axis=0)   # (3,)
-    std  = np.nanstd( flat, axis=0)   # (3,)
+def _per_region_zscore(data):
+    """Per-region, per-target Z-score across time.  data: (T, n_cities, 3)."""
+    mean = np.nanmean(data, axis=0)   # (n_cities, 3)
+    std  = np.nanstd( data, axis=0)   # (n_cities, 3)
     return (data - mean) / (std + 1e-8), mean, std
 
 
@@ -361,7 +360,7 @@ def run_multivariate(train_df, full_df, cities, city_onehot, device):
 
     # ── Train/test split ──────────────────────────────────────────────────────
     train_data, _, _ = _pivot(train_df)
-    train_norm, mean_tr, std_tr = _global_zscore(train_data)
+    train_norm, mean_tr, std_tr = _per_region_zscore(train_data)
 
     print(f"  Building dataset and training (eval split)…")
     model_eval = _train(_mv_samples(train_norm, city_onehot),
@@ -374,7 +373,7 @@ def run_multivariate(train_df, full_df, cities, city_onehot, device):
         preds_norm = _rollout_mv(model_eval, seed, city_onehot[city_idx],
                                  TEST_DAYS, device)                   # (30, 3)
         for step, p in enumerate(preds_norm):
-            raw = p * (std_tr + 1e-8) + mean_tr
+            raw = p * (std_tr[city_idx] + 1e-8) + mean_tr[city_idx]
             raw[TARGETS.index("PRECIPITATION_MM")] = max(0.0, raw[TARGETS.index("PRECIPITATION_MM")])
             test_rows.append({"step": step, "CITY": city,
                                "TEMPERATURE_C": raw[0],
@@ -384,7 +383,7 @@ def run_multivariate(train_df, full_df, cities, city_onehot, device):
 
     # ── Full retrain ──────────────────────────────────────────────────────────
     full_data, _, _ = _pivot(full_df)
-    full_norm, mean_full, std_full = _global_zscore(full_data)
+    full_norm, mean_full, std_full = _per_region_zscore(full_data)
 
     print(f"  Retraining on full data…")
     model_full = _train(_mv_samples(full_norm, city_onehot),
@@ -403,7 +402,7 @@ def run_multivariate(train_df, full_df, cities, city_onehot, device):
                                  FORECAST_DAYS, device,
                                  noise_std=ns, rng_seed=city_idx)
         for step, p in enumerate(preds_norm):
-            raw = p * (std_full + 1e-8) + mean_full
+            raw = p * (std_full[city_idx] + 1e-8) + mean_full[city_idx]
             raw[TARGETS.index("PRECIPITATION_MM")] = max(0.0, raw[TARGETS.index("PRECIPITATION_MM")])
             future_rows.append({"step": step, "CITY": city,
                                  "TEMPERATURE_C": raw[0],

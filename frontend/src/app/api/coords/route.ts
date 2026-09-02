@@ -1,27 +1,54 @@
 import { NextResponse } from "next/server";
+import { promises as fs } from "fs";
+import path from "path";
 import { fetchWeatherData } from "@/lib/delta-share";
 import { getCitiesFromData } from "@/lib/utils";
 
+export const runtime = "nodejs";
+
 export type CityCoords = Record<string, { lat: number; lng: number }>;
 
-// Cache geocoded results — invalidated when the process restarts
+// Cache coordinate results — invalidated when the process restarts
 let cache: { coords: CityCoords; ts: number } | null = null;
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
-async function geocodeCity(
-  city: string
-): Promise<{ lat: number; lng: number } | null> {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return null;
-    const json = await res.json();
-    const result = json.results?.[0];
-    if (!result) return null;
-    return { lat: result.latitude, lng: result.longitude };
-  } catch {
-    return null;
+// ---------------------------------------------------------------------------
+// Local india_region_coords.json lookup
+// ---------------------------------------------------------------------------
+// The file is read from disk at most once per server process; the parsed
+// name-keyed lookup map is cached in a module-level variable. A cached
+// in-flight promise guards against concurrent first-requests racing each
+// other while the file is still being read.
+// ---------------------------------------------------------------------------
+
+type CoordLookup = Map<string, { lat: number; lng: number }>;
+
+let lookupPromise: Promise<CoordLookup> | null = null;
+
+function normalize(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{Mn}/gu, "")
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+async function loadLookup(): Promise<CoordLookup> {
+  if (!lookupPromise) {
+    lookupPromise = (async () => {
+      const filePath = path.join(process.cwd(), "public", "india_region_coords.json");
+      const raw = await fs.readFile(filePath, "utf-8");
+      const json = JSON.parse(raw) as Record<string, { lat: number; lng: number }>;
+
+      const map: CoordLookup = new Map();
+      for (const [name, coords] of Object.entries(json)) {
+        map.set(normalize(name), coords);
+      }
+      return map;
+    })();
   }
+  return lookupPromise;
 }
 
 export async function GET() {
@@ -32,22 +59,25 @@ export async function GET() {
   try {
     const data = await fetchWeatherData();
     const cities = getCitiesFromData(data);
+    const lookup = await loadLookup();
 
-    const entries = await Promise.all(
-      cities.map(async (city) => {
-        const coords = await geocodeCity(city);
+    const entries = cities
+      .map((city) => {
+        const coords = lookup.get(normalize(city));
+        if (!coords) {
+          console.warn(`No coordinates found for region: ${city}`);
+          return null;
+        }
         return [city, coords] as const;
       })
-    );
+      .filter((e): e is [string, { lat: number; lng: number }] => e !== null);
 
-    const coords: CityCoords = Object.fromEntries(
-      entries.filter((e): e is [string, { lat: number; lng: number }] => e[1] !== null)
-    );
+    const coords: CityCoords = Object.fromEntries(entries);
 
     cache = { coords, ts: Date.now() };
     return NextResponse.json(coords);
   } catch (err) {
-    console.error("Failed to geocode cities:", err);
+    console.error("Failed to look up city coordinates:", err);
     return NextResponse.json(
       { error: "Failed to fetch city coordinates" },
       { status: 500 }

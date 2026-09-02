@@ -67,6 +67,29 @@ npm start
 
 > Requires Node.js ≥ 20. Set environment variables in `frontend/.env.local` (see Delta Sharing config).
 
+### Docker
+
+The dashboard can also be run as a containerized stack (Next.js app behind an
+nginx reverse proxy):
+
+```bash
+cd /raid/aidp-weather-forecast-india
+docker compose up -d --build
+```
+
+The dashboard is then served at **http://localhost:9334**. Container names —
+`aidp-india-weather-forecast` (Next.js) and `aidp-india-weather-nginx`
+(reverse proxy) — and the host port are deliberately namespaced apart from the
+Indonesian weather stack, which runs on port 9333 with `aidp-weather-*`
+container names, so both stacks can run side by side on the same host without
+colliding.
+
+Before starting the stack, create `frontend/.env.local` from
+`frontend/.env.local.example` and fill in the Delta Sharing credentials. Without
+it, the app still starts, but the data pages will error since there is no gold
+table to read from — `/architecture` still renders since it has no data
+dependency.
+
 ---
 
 ## Environment Variables

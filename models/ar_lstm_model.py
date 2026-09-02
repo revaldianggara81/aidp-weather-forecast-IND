@@ -81,11 +81,10 @@ def _pivot(df):
 
 
 def _normalize(data, mean=None, std=None):
-    flat = data.reshape(-1, N_TARGETS)
     if mean is None:
-        mean = np.nanmean(flat, axis=0)
-        std  = np.nanstd(flat, axis=0)
-    normed = (data - mean[None, None, :]) / (std[None, None, :] + 1e-8)
+        mean = np.nanmean(data, axis=0)
+        std  = np.nanstd(data, axis=0)
+    normed = (data - mean[None, :, :]) / (std[None, :, :] + 1e-8)
     return normed, mean, std
 
 
@@ -162,7 +161,7 @@ def _build_predictions(model, data_norm, city_onehot, input_len, n_days,
             model, data_norm[:, city_idx, :],
             city_onehot[city_idx], input_len, n_days, device,
         )
-        pred = _denormalize(pred_norm, mean, std)
+        pred = _denormalize(pred_norm, mean[city_idx], std[city_idx])
         pred[:, TARGETS.index("PRECIPITATION_MM")] = np.maximum(
             0.0, pred[:, TARGETS.index("PRECIPITATION_MM")]
         )

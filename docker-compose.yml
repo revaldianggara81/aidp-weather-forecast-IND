@@ -3,9 +3,14 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: aidp-weather-web
+    image: aidp-india-web
+    container_name: aidp-india-weather-forecast
+    # Delta Sharing credentials aren't created yet (India share is still being
+    # set up in AIDP), so this file is optional. Data pages stay empty until
+    # frontend/.env.local is created from frontend/.env.local.example.
     env_file:
-      - ./frontend/.env.local
+      - path: ./frontend/.env.local
+        required: false
     environment:
       NODE_ENV: production
     expose:
@@ -14,9 +19,9 @@ services:
 
   nginx:
     image: nginx:alpine
-    container_name: aidp-weather-nginx
+    container_name: aidp-india-weather-nginx
     ports:
-      - "9333:80"
+      - "9334:80"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
